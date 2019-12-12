@@ -60,6 +60,11 @@ def preparation_data(path,concat=True):
     df_caracteristiques['heure'] = df_caracteristiques.Date.dt.hour
 
     
+    ## Travail sur les variables latitude et longitude 
+    df_caracteristiques.lat = df_caracteristiques.lat/100000
+    df_caracteristiques.long = df_caracteristiques.long/100000
+
+    
  
     if concat==True:
         return df_caracteristiques, df_lieux, df_usagers, df_vehicules
