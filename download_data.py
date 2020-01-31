@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import os
 from shutil import copyfile
+from google_drive_downloader import GoogleDriveDownloader as gdd
+
 
 try:
     from urllib.request import urlretrieve
@@ -39,13 +41,19 @@ def main(output_dir='data'):
         urlretrieve(url, filename=output_file)
         print("=> File saved as {}".format(output_file))
 
-    # copy awards data to submission file
+    # Download sensor data
+    output_sensor_file = os.path.join(output_dir, "sensors_data.csv")
+    if not os.path.exists(output_sensor_file):
+        gdd.download_file_from_google_drive(file_id="1W-sD3qS5KXj1z2QUXuLyFx7lbL_WPoeX",
+                                        dest_path=output_sensor_file)
+
     if os.path.exists(os.path.join('submissions', 'starting_kit')):
         copyfile(
             os.path.join('data', DATA[0]),
             os.path.join('submissions', 'starting_kit',
                          DATA[0])
         )
+
 
 
 if __name__ == '__main__':
