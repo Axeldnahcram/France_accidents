@@ -5,15 +5,25 @@ import rampwf as rw
 from rampwf.workflows import FeatureExtractorRegressor
 from rampwf.score_types.base import BaseScoreType
 from sklearn.model_selection import GroupShuffleSplit
+from google_drive_downloader import GoogleDriveDownloader as gdd
+from sklearn.model_selection import KFold
+from sklearn.metrics import recall_score, precision_score
 
 problem_title = 'Predicting number of accident'
+_target_column_name = 'Nb_Acc'
+Predictions = rw.prediction_types.make_regression()
+
 
 # A type (class) which will be used to create wrapper objects for y_pred
-Predictions = rw.prediction_types.make_regression(label_names=['n_collisions'])
-workflow = rw.workflows.FeatureExtractorRegressor()
+class Fr_Acc(FeatureExtractorRegressor):
 
-# An object implementing the workflow
+    def __init__(self, workflow_element_names=[
+            'feature_extractor', 'regressor', 'sensors_data.csv', 'meteo_jour.csv']):
+        super(Fr_Acc, self).__init__(workflow_element_names[:2])
+        self.element_names = workflow_element_names
 
+
+workflow = Fr_Acc()
 # --------------------------------------------
 # Scoring
 # --------------------------------------------
@@ -39,7 +49,7 @@ class NRMSE(BaseScoreType):
                     nrmse += ((val_pred - val_true) / val_true) ** 2
             else:
                 nrmse += val_pred ** 2
-        return np.sqrt(nrmse / y_true.shape[0])[0]
+        return np.sqrt(nrmse / y_true.shape[0])
 
 
 class Precision(BaseScoreType):
@@ -110,10 +120,19 @@ def _read_data(path, f_name):
 
 
 def get_train_data(path='.'):
-    f_name = 'company_revenue_TRAIN.csv.zip'
+    f_name = "paris_accident_train.csv.zip"
+    output_file = os.path.join(path,'data', f_name)
+    if not os.path.exists(output_file):
+        gdd.download_file_from_google_drive(file_id="1j1cH7cUH8-XX8exUW4SW2KYCtvYCkL4-",
+                                            dest_path=output_file)
+
     return _read_data(path, f_name)
 
 
 def get_test_data(path='.'):
-    f_name = 'company_revenue_TEST.csv.zip'
+    f_name = "paris_accident_test.csv.zip"
+    output_file = os.path.join(path,'data', f_name)
+    if not os.path.exists(output_file):
+        gdd.download_file_from_google_drive(file_id="1BTZ5YZF3Ib2dwL2OMm3-o2uGnSwX04pq",
+                                            dest_path=output_file)
     return _read_data(path, f_name)
