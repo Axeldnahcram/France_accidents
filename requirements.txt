@@ -13,3 +13,4 @@ GoogleDriveDownloader
 seaborn
 datetime
 json
+rampwf (pip install git+https://github.com/paris-saclay-cds/ramp-workflow.git)
