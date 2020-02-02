@@ -13,20 +13,23 @@ class FeatureExtractor(object):
         pass
 
     def fit(self, X_df, y_array):
+        numeric_transformer = Pipeline(steps=[
+            ('impute', SimpleImputer(strategy='median'))
+        ])
+
         meteo_jour = pd.read_csv('./data/meteo_jour.csv')
         meteo_jour["jour"] = pd.to_datetime(meteo_jour["jour"], dayfirst=True).dt.date
 
         def process_date(X):
             date = pd.to_datetime(X['Date'])
             return np.c_[date.dt.year, date.dt.month, date.dt.day, date.dt.hour]
+
         date_transformer = FunctionTransformer(process_date, validate=False)
 
-
-
         temp_cols = ['temp_high', 'temp_avg', 'temp_low',
-               'dew_point_high', 'dew_point_avg', 'dew_point_low', 'humidity_high',
-               'humidity_avg', 'humidity_low', 'speed_high', 'speed_avg', 'speed_low',
-               'pressure_high', 'pressure_low', 'precipitation_acc']
+                     'dew_point_high', 'dew_point_avg', 'dew_point_low', 'humidity_high',
+                     'humidity_avg', 'humidity_low', 'speed_high', 'speed_avg', 'speed_low',
+                     'pressure_high', 'pressure_low', 'precipitation_acc']
 
         def merge(X):
             X["jour"] = pd.to_datetime(X['Date']).dt.date
@@ -37,14 +40,14 @@ class FeatureExtractor(object):
 
         merge_transformer = FunctionTransformer(merge, validate=False)
 
-
-
+        num_cols = ["Num_Qu", 'iu_ac', 'q', 'k', 'etat_trafic', 'etat_barre', 'IU_AC']
         drop_cols = ["t_1h"]
         date_cols = ["Date"]
         merge_col = ["Date"]
 
         preprocessor = ColumnTransformer(
             transformers=[
+                ('num', numeric_transformer, num_cols),
                 ('merge', make_pipeline(merge_transformer,
                                         SimpleImputer(strategy='median')), merge_col),
                 ('date', make_pipeline(date_transformer,
@@ -52,8 +55,6 @@ class FeatureExtractor(object):
                 ('drop cols', 'drop', drop_cols),
 
             ])
-
-
 
         self.preprocessor = preprocessor
         self.preprocessor.fit(X_df, y_array)

@@ -30,26 +30,26 @@ workflow = Fr_Acc()
 
 # Normalized root mean square error
 
-class NRMSE(BaseScoreType):
+class Paris_Error(BaseScoreType):
     is_lower_the_better = True
     minimum = 0.0
     maximum = np.inf
 
-    def __init__(self, name='nrmse', precision=2):
+    def __init__(self, name='paris_error', precision=2):
         self.name = name
         self.precision = precision
 
     def __call__(self, y_true, y_pred):
-        nrmse = 0
+        error = 0
         for val_true, val_pred in zip(y_true, y_pred):
             if (val_true != 0):
                 if val_pred < val_true:
-                    nrmse += (((val_pred - val_true) / val_true) * 1.5) ** 2
+                    error += (((val_pred - val_true) / val_true) * 1.5) ** 2
                 else:
-                    nrmse += ((val_pred - val_true) / val_true) ** 2
+                    error += ((val_pred - val_true) / val_true) ** 2
             else:
-                nrmse += val_pred ** 2
-        return np.sqrt(nrmse / y_true.shape[0])
+                error += val_pred ** 2
+        return np.sqrt(error / y_true.shape[0])
 
 
 class Precision(BaseScoreType):
@@ -87,7 +87,7 @@ class Recall(BaseScoreType):
 score_types = [
 
     # Normalized root mean square error
-    NRMSE(name='nrmse', precision=2),
+    Paris_Error(name='paris_error', precision=2),
     # Precision and recall
     Precision(name='prec', precision=2),
     Recall(name='rec', precision=2)
